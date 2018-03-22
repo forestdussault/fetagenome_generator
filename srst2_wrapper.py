@@ -8,7 +8,7 @@ from fetagenome import find_paired_reads
 
 def run_srst2(sampleid, r1, r2, gene_db, output_directory, threads=10):
     """
-    Calls SRST2 on paired-end reads
+    Calls SRST2 on paired-end reads. Note that ARGannot_r2.fasta is the recommended ARG database for SRST2.
     :param sampleid: Base sample ID for reads
     :param r1: Forward read (.fastq.gz)
     :param r2: Reverse read (.fastq.gz)
@@ -17,7 +17,8 @@ def run_srst2(sampleid, r1, r2, gene_db, output_directory, threads=10):
     :param threads: Number of CPUs to dedicate to task
     """
     print('\nRunning SRST2 on {}'.format(sampleid))
-    srst2_output = os.path.join(output_directory, sampleid + '_SRST2')
+    srst2_output = os.path.join(output_directory,
+                                sampleid + '_SRST2')
     cmd = 'srst2 ' \
           '--input_pe {r1} {r2} ' \
           '--gene_db {gene_db} ' \
@@ -30,26 +31,26 @@ def run_srst2(sampleid, r1, r2, gene_db, output_directory, threads=10):
     # Remove extra junk
     txt_files = glob.glob(os.path.join(output_directory, '*.txt'))
     txt_files = [x for x in txt_files if 'fullgenes' in x]
-    for file in os.listdir(output_directory):
-        file = os.path.join(output_directory, file)
-        if file not in txt_files:
-            os.remove(file)
+    for f in os.listdir(output_directory):
+        f = os.path.join(output_directory, f)
+        if f not in txt_files:
+            os.remove(f)
 
 
 def combine_results(srst2_result_directory):
     """
     Combines all SRST2 fullgenes file output into one tab delimited file
-    :param output_directory: Directory containing SRST2 output
+    :param srst2_result_directory: Directory containing SRST2 output
     """
     output_files = glob.glob(os.path.join(srst2_result_directory, '*fullgenes*'))
 
     df_list = []
-    for file in output_files:
-        tmp_df = pd.read_csv(file, delimiter='\t')
+    for f in output_files:
+        tmp_df = pd.read_csv(f, delimiter='\t')
         df_list.append(tmp_df)
 
     df = pd.concat(df_list, ignore_index=True)
-    df.to_csv(os.path.join(srst2_result_directory, 'SRST2_ResFinder_Combined_Output.tsv'), sep='\t')
+    df.to_csv(os.path.join(srst2_result_directory, 'SRST2_ResFinder_Combined_Output.tsv'), sep='\t', index=None)
 
 
 @click.command()
