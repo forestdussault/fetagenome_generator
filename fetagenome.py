@@ -194,6 +194,15 @@ def fetagenome(input_directory, output_directory, proportion, target_sample, num
 
     merge_fastq_dir(directory=output_directory, proportion=proportion)
 
+    # Cleanup extraneous fastq files
+    for f in os.listdir(output_directory):
+        if 'Merged_Fetagenome' in os.path.basename(f):
+            continue
+        elif f.endswith('.fastq.gz') is False:
+            continue
+        else:
+            os.remove(os.path.join(output_directory, f))
+
 
 if __name__ == '__main__':
     fetagenome()
