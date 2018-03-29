@@ -4,8 +4,7 @@ from subprocess import Popen
 from accessories import kwargs_to_string, find_paired_reads, run_subprocess, count_reads
 
 
-def subsample_reads(forward_in, forward_out, num_reads, returncmd=True, reverse_in='NA', reverse_out='NA',
-                    **kwargs):
+def subsample_reads(forward_in, forward_out, num_reads, returncmd=True, reverse_in='NA', reverse_out='NA', **kwargs):
     options = kwargs_to_string(kwargs)
     if os.path.isfile(forward_in.replace('_R1', '_R2')) and reverse_in == 'NA' and '_R1' in forward_in:
         reverse_in = forward_in.replace('_R1', '_R2')
@@ -45,28 +44,32 @@ def subsample(r1, r2, r1_out, r2_out, num_reads):
     out, err, cmd = subsample_reads(forward_in=r1, reverse_in=r2,
                                     forward_out=r1_out, reverse_out=r2_out,
                                     num_reads=num_reads)
-
-    print('STDOUT**\n{}'.format(out))
-    print('STDERR**\n{}'.format(err))
     print(cmd)
     return out, err
 
 
 def normalize(r1, r2, r1_out, r2_out, target_depth=20):
+    """
+    bbnorm.sh wrapper
+    :param r1:
+    :param r2:
+    :param r1_out:
+    :param r2_out:
+    :param target_depth:
+    :return:
+    """
     cmd = 'bbnorm.sh in={r1} in2={r2} ' \
           'out={r1_out} out2={r2_out} ' \
           'target={target_depth}'.format(r1=r1, r2=r2,
                                          r1_out=r1_out, r2_out=r2_out,
                                          target_depth=target_depth)
     out, err = run_subprocess(cmd)
-    # print('STDOUT**\n{}'.format(out))
-    # print('STDERR**\n{}'.format(err))
     return out, err
 
 
-def subsample_folder(directory, outdir, num_reads, forward_id='R1', reverse_id='R2', ):
+def subsample_folder(directory, outdir, num_reads, forward_id='R1', reverse_id='R2'):
     """
-    Normalize all of the input reads to the param provided to num_reads
+    Subsample all of the input reads detected in the given directory to the parameter provided to num_reads
     :param directory:
     :param outdir:
     :param num_reads:
@@ -100,7 +103,15 @@ def count_reads_folder(subsampled_dict):
 
 
 def adjust_target(sample_id, subsampled_dict, read_count_dict, target_percentage, num_reads):
-
+    """
+    Subsamples the target sample ID to n reads in order to hit the target percentage of the whole fake metagenome
+    :param sample_id:
+    :param subsampled_dict:
+    :param read_count_dict:
+    :param target_percentage:
+    :param num_reads:
+    :return:
+    """
     # Verify read count for all samples is the same (it should be at this point)
     for key, value in read_count_dict.items():
         if int(value) != int(num_reads*2):
@@ -123,12 +134,9 @@ def adjust_target(sample_id, subsampled_dict, read_count_dict, target_percentage
     subsample_target_value = ((total_reads_removed/(other_percent*(total_samples-1))) - total_reads_removed)/2
     subsample_target_value = int(round(subsample_target_value))
 
-    print('\nSubsampling target {} to {} reads ({}% of total of {})'.format(sample_id,
-                                                                            subsample_target_value,
-                                                                            float(target_percentage)*100,
-                                                                            subsample_target_value+total_reads_removed))
-
-    print(subsampled_dict[real_sampleid][0])
+    print('\nSubsampling target {} to {} reads '
+          '({}% of total of {})'.format(sample_id, subsample_target_value,
+                                        float(target_percentage)*100, subsample_target_value+total_reads_removed))
 
     r1_out = subsampled_dict[real_sampleid][0].replace('_subsampled', '_subsampled_TARGET')
     r2_out = subsampled_dict[real_sampleid][1].replace('_subsampled', '_subsampled_TARGET')
@@ -143,6 +151,12 @@ def adjust_target(sample_id, subsampled_dict, read_count_dict, target_percentage
 
 
 def merge_fastq_dir(directory, proportion):
+    """
+    Quick system call to to merge all fastq files into a single file
+    :param directory:
+    :param proportion:
+    :return:
+    """
     cmd = 'cat *.f*q* > Merged_Fetagenome_{}.fastq.gz'.format(str(proportion))
     p = Popen(cmd, shell=True, cwd=directory)
     p.wait()
