@@ -47,9 +47,13 @@ def srst2_output_cleanup(output_directory):
     # Remove extra junk
     txt_files = glob.glob(os.path.join(output_directory, '*.txt'))
     txt_files = [x for x in txt_files if 'fullgenes' in x]
+
+    # Keep fastq merged file
+    fastq_files = glob.glob(os.path.join(output_directory, '*.fastq.gz'))
+    files_to_keep = txt_files + fastq_files
     for f in os.listdir(output_directory):
         f = os.path.join(output_directory, f)
-        if f not in txt_files:
+        if f not in files_to_keep:
             os.remove(f)
 
 
