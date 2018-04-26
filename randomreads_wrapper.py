@@ -4,14 +4,15 @@ import click
 from accessories import run_subprocess
 
 
-# NOTE: Looks like doing paired end reads makes randomreads.sh go extremely slowly. No way to multithread...
+# NOTE: Looks like doing paired-end reads makes randomreads.sh go much slower. No way to multithread?
 def call_randomreads(ref, output_dir, num_reads, length=150):
-    r1 = os.path.join(output_dir, 'Simulated_Metagenome_{}reads.fastq.gz'.format(num_reads))
-    # r2 = os.path.join(output_dir, 'simulated_metagenomic_reads_{}_R2.fastq.gz'.format(num_reads))
+    r1 = os.path.join(output_dir, 'Simulated_Metagenome_{}reads_R1.fastq.gz'.format(num_reads))
+    r2 = os.path.join(output_dir, 'Simulated_Metagenome_{}reads_R2.fastq.gz'.format(num_reads))
     cmd = 'randomreads.sh ' \
           '-Xmx40g ' \
           'ref={ref} ' \
-          'out={r1} ' \
+          'out1={r1} ' \
+          'out2={r2} ' \
           'length={length} ' \
           'reads={num_reads} ' \
           'metagenome=t ' \
@@ -19,15 +20,16 @@ def call_randomreads(ref, output_dir, num_reads, length=150):
           'midq=30 ' \
           'minq=20 ' \
           'snprate=0.02 ' \
-          'paired=f ' \
-          'overwrite=t'.format(ref=ref, r1=r1, num_reads=num_reads, length=length)
+          'paired=t ' \
+          'overwrite=t'.format(ref=ref, r1=r1, r2=r2, num_reads=num_reads, length=length)
     print(cmd)
     out, err = run_subprocess(cmd)
     print(out)
     print(err)
-    return r1
+    return r1, r2
 
 
+# TODO: Investigate if fuse.sh can improve results
 def fuse_contigs():
     pass
 
@@ -64,11 +66,12 @@ def main(input_dir, output_dir, num_reads, read_length):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    # run program
+    # generate metagenome
     concatenated_fasta = concatenate_fasta_list(input_dir)
-    metagenome = call_randomreads(ref=concatenated_fasta, output_dir=output_dir,
-                                  num_reads=num_reads, length=read_length)
-    print('Simulated metagenome path: {}'.format(metagenome))
+    r1, r2 = call_randomreads(ref=concatenated_fasta, output_dir=output_dir,
+                              num_reads=num_reads, length=read_length)
+    print('R1 Path: {}'.format(r1))
+    print('R2 Path: {}'.format(r2))
 
     # cleanup
     os.remove(concatenated_fasta)
