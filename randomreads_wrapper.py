@@ -4,15 +4,6 @@ import click
 from accessories import run_subprocess
 
 
-"""
-Simulating metagenomes to emulate the GRDI HiSeq output.
-Read length = 150
-Quality is generally very good.
-Number of reads is around ~40,000,000 per sample
-Looks like there is a little bit of Illumina universal adapter contamination judging by FastQC results.
-"""
-
-
 # NOTE: Looks like doing paired end reads makes randomreads.sh go extremely slowly. No way to multithread...
 def call_randomreads(ref, output_dir, num_reads, length=150):
     r1 = os.path.join(output_dir, 'Simulated_Metagenome_{}reads.fastq.gz'.format(num_reads))
@@ -44,7 +35,7 @@ def fuse_contigs():
 def concatenate_fasta_list(input_dir):
     fasta_list = glob.glob(os.path.join(input_dir, '*.f*a'))
     fasta_string = str()
-    output_fasta = os.path.join(os.path.join(input_dir, 'ConcatenatedAssemblies.fasta'))
+    output_fasta = os.path.join(os.path.join(input_dir, 'ConcatenatedAssemblies_temp.fasta'))
     for fasta in fasta_list:
         fasta_string += fasta + ' '
     cmd = 'cat {} > {}'.format(fasta_string, output_fasta)
@@ -75,8 +66,12 @@ def main(input_dir, output_dir, num_reads, read_length):
 
     # run program
     concatenated_fasta = concatenate_fasta_list(input_dir)
-    metagenome = call_randomreads(ref=concatenated_fasta, output_dir=output_dir, num_reads=num_reads, length=read_length)
-    print(metagenome)
+    metagenome = call_randomreads(ref=concatenated_fasta, output_dir=output_dir,
+                                  num_reads=num_reads, length=read_length)
+    print('Simulated metagenome path: {}'.format(metagenome))
+
+    # cleanup
+    os.remove(concatenated_fasta)
 
 
 if __name__ == '__main__':
