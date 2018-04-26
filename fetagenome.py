@@ -3,6 +3,15 @@ import click
 from subprocess import Popen
 from accessories import kwargs_to_string, find_paired_reads, run_subprocess, count_reads
 
+"""
+How this works:
+1. Pair all fastq.gz read files in a given directory
+2. Subsample all files to a given read depth (--num_reads)
+3. Verify all read counts
+4. Further subsample a target sample (--target_sample) a given proportion of the total reads (--proportion)
+5. Concatenate all subsampled fastq files into a single merged 'fetagenome'
+"""
+
 
 def subsample_reads(forward_in, forward_out, num_reads, returncmd=True, reverse_in='NA', reverse_out='NA', **kwargs):
     options = kwargs_to_string(kwargs)
@@ -153,6 +162,7 @@ def adjust_target(sample_id, subsampled_dict, read_count_dict, target_percentage
 def merge_fastq_dir(directory, proportion):
     """
     Quick system call to to merge all fastq files into a single file
+    TODO: Verify that this is an acceptable way to simulate a metagenome
     :param directory:
     :param proportion:
     :return:
