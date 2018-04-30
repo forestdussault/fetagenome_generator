@@ -5,6 +5,7 @@ from accessories import run_subprocess
 
 
 # NOTE: Looks like doing paired-end reads makes randomreads.sh go much slower. No way to multithread?
+# 1,000,000 paired-end reads takes ~30mins
 def call_randomreads(ref, output_dir, num_reads, length=150):
     r1 = os.path.join(output_dir, 'Simulated_Metagenome_{}reads_R1.fastq.gz'.format(num_reads))
     r2 = os.path.join(output_dir, 'Simulated_Metagenome_{}reads_R2.fastq.gz'.format(num_reads))
@@ -16,10 +17,11 @@ def call_randomreads(ref, output_dir, num_reads, length=150):
           'length={length} ' \
           'reads={num_reads} ' \
           'metagenome=t ' \
+          'illuminanames=t ' \
           'maxq=40 ' \
           'midq=30 ' \
           'minq=20 ' \
-          'snprate=0.02 ' \
+          'snprate=0 ' \
           'paired=t ' \
           'overwrite=t'.format(ref=ref, r1=r1, r2=r2, num_reads=num_reads, length=length)
     print(cmd)
