@@ -57,25 +57,6 @@ def subsample(r1, r2, r1_out, r2_out, num_reads):
     return out, err
 
 
-def normalize(r1, r2, r1_out, r2_out, target_depth=20):
-    """
-    bbnorm.sh wrapper
-    :param r1:
-    :param r2:
-    :param r1_out:
-    :param r2_out:
-    :param target_depth:
-    :return:
-    """
-    cmd = 'bbnorm.sh in={r1} in2={r2} ' \
-          'out={r1_out} out2={r2_out} ' \
-          'target={target_depth}'.format(r1=r1, r2=r2,
-                                         r1_out=r1_out, r2_out=r2_out,
-                                         target_depth=target_depth)
-    out, err = run_subprocess(cmd)
-    return out, err
-
-
 def subsample_folder(directory, outdir, num_reads, forward_id='R1', reverse_id='R2'):
     """
     Subsample all of the input reads detected in the given directory to the parameter provided to num_reads
