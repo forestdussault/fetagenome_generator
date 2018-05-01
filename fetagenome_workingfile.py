@@ -56,7 +56,9 @@ def main():
             replicate_paths.append(p)
 
         for output_path in replicate_paths:
-            # Generate fetagenome
+            # Generate fetagenome with the following parameters.
+            # Adjust -n parameter to the minimum number of reads in your FASTQ raw dataset
+            # Set -t to the target SeqID you're adjusting the proportion of
             cmd = 'python fetagenome.py ' \
                   '-i {input} ' \
                   '-o {output} ' \
